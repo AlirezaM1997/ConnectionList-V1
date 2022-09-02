@@ -6,6 +6,7 @@ import Dashboard from "./components/Dashboard";
 import Home from "./components/Home";
 import "./index.css"
 const THEME = createTheme({
+  direction: "rtl",
   typography: {
     fontFamily: `"IRANYEKAN"`,
     fontSize: 14,

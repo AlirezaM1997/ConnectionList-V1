@@ -1,15 +1,18 @@
 import { Box, Breadcrumbs, Button, Link, Typography } from "@mui/material";
-import { FC, useState } from "react";
+import { useState } from "react";
 import CircleIcon from "@mui/icons-material/Circle";
 import { IConnection } from "../interfaces/interface";
+import List from "@mui/material/List";
+import ConnectionItem from "./ConnectionItem";
+import AddNewConnection from "./AddNewConnection";
 export default function Dashboard() {
-  const [connectionType, setConnectionType] = useState<string>("");
-  const [link, setLink] = useState<string>("");
-  const [connectionList, setConnectionList] = useState<IConnection[]>([]);
-  const addNew = () => {
-    const newConnection = { connectionType, link };
-    setConnectionList([...connectionList, newConnection]);
-  };
+  const [checked, setChecked] = useState<boolean>(false);
+  const [connectionList, setConnectionList] = useState<IConnection[]>([
+    {
+      connectionType: "توییتر",
+      link: "https://mui.com/material-ui/react-card/",
+    },
+  ]);
   return (
     <>
       <Box
@@ -68,7 +71,7 @@ export default function Dashboard() {
           </Typography>
           <Button
             variant="contained"
-            onClick={addNew}
+            onClick={()=>setChecked(true)}
             sx={{
               color: "#ffa82e",
               mt: 2,
@@ -86,6 +89,17 @@ export default function Dashboard() {
           >
             + افزودن مسیر ارتباطی
           </Button>
+          <AddNewConnection
+            checked={checked}
+            setConnectionList={setConnectionList}
+            connectionList={connectionList}
+            setChecked={setChecked}
+          />
+          <List>
+            {connectionList.map((item, index) => (
+              <ConnectionItem key={index} item={item} />
+            ))}
+          </List>
         </Box>
       </Box>
     </>
