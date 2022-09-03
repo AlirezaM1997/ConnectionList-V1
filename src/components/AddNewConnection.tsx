@@ -3,43 +3,76 @@ import Grid from "@mui/material/Grid";
 import { Box, Button, Link, Typography } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-import TwitterIcon from "@mui/icons-material/Twitter";
-import TelegramIcon from "@mui/icons-material/Telegram";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import PublicIcon from "@mui/icons-material/Public";
-import { ISocialNetworks } from "../interfaces/interface";
-import { useState, useEffect } from "react";
-
-const socialNetworks: ISocialNetworks[] = [
-  { label: "توییتر", value: "twitter", logo: <TwitterIcon /> },
-  { label: "تلگرام", value: "telegram", logo: <TelegramIcon /> },
-  { label: "اینستاگرام", value: "instagram", logo: <InstagramIcon /> },
-  { label: "فیسبوک", value: "facebook", logo: <FacebookIcon /> },
-  { label: "لینکدین", value: "linkedIn", logo: <LinkedInIcon /> },
-  { label: "وب سایت", value: "website", logo: <PublicIcon /> },
-];
-
+import { useState, useEffect, useRef, ChangeEvent } from "react";
+import { withStyles} from "@mui/styles";
+import { socialNetworks } from "../features/constants";
+import { UID, validateUrl } from "../features/functions";
 export default function AddNewConnection({
   checked,
   connectionList,
   setConnectionList,
   setChecked,
 }: any) {
-  const [connectionType, setConnectionType] = useState<string>("");
+  const [inValidLink, setInvalidLink] = useState<boolean>(false);
+  const CssTextField = withStyles({
+    root: {
+      // '& label.Mui-focused': {
+      //   color: 'white',
+      // },
+      '& .MuiInput-underline:after': {
+        borderBottomColor: 'yellow',
+      },
+      '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+          borderColor: `${inValidLink ?"red":""}`,
+        },
+        '&:hover fieldset': {
+          borderColor: `${inValidLink ?"red":""}`,
+        },
+        '&.Mui-focused fieldset': {
+          borderColor: `${inValidLink ?"red":""}`,
+        },
+      },
+    },
+  })(TextField);
+  const [connectionType, setConnectionType] = useState<string | any>(
+    "undefined"
+  );
   const [link, setLink] = useState<string>("");
   const [disabled, setDisabled] = useState<boolean>(true);
+  const [inValidConnectionType, setInvalidConnectionType] =
+    useState<boolean>(false);
   useEffect(() => {
-    if (link !== "" && connectionType !== "undefined") {
+    if (validateUrl(link) && connectionType !== "undefined") {
       setDisabled(false);
     } else {
       setDisabled(true);
     }
   }, [connectionType, link]);
+  const textRef: any = useRef();
+  const inputRef: any = useRef();
+  const handleConnectionType = (e: any) => {
+    setConnectionType(e);
+    if (e === "undefined") {
+      setInvalidConnectionType(true);
+    } else {
+      setInvalidConnectionType(false);
+    }
+  };
+  const handleLink = (e: any) => {
+    setLink(e);
+    if (!validateUrl(textRef.current.value)) {
+      setInvalidLink(true);
+    } else {
+      setInvalidLink(false);
+    }
+  };
   const addNew = () => {
-    const newConnection = { connectionType, link };
+    const newConnection = { connectionType, link, _id: UID() };
     setConnectionList([...connectionList, newConnection]);
+    setConnectionType("undefined");
+    setLink("");
+    setChecked(false);
   };
   return (
     <>
@@ -77,11 +110,13 @@ export default function AddNewConnection({
                   value: "",
                   logo: null,
                 }}
-                inputValue={connectionType}
-                onInputChange={(event, newInputValue) => {
-                  setConnectionType(newInputValue);
-                }}
-                renderInput={(params) => <TextField {...params} label="نوع" />}
+                value={connectionType}
+                onChange={(e: ChangeEvent<HTMLInputElement | any>): void =>
+                  handleConnectionType(e.target.innerText)
+                }
+                renderInput={(params) => (
+                  <TextField {...params} inputRef={inputRef} label="نوع" />
+                )}
                 renderOption={(props, option) => (
                   <Box component="li" sx={{}} {...props}>
                     {option.logo}
@@ -89,17 +124,38 @@ export default function AddNewConnection({
                   </Box>
                 )}
               />
+              <Typography
+                fontWeight={400}
+                fontSize={"0.64rem"}
+                lineHeight={1.66}
+                color="rgb(211, 47, 47)"
+                m={"3px 14px -20px"}
+                display={`${inValidConnectionType ? "" : "none"}`}
+              >
+                وارد کردن این فیلد اجباری است
+              </Typography>
             </Grid>
             <Grid item xs={6} md={8}>
               <TextField
                 id="outlined-basic"
+                inputRef={textRef}
                 label="لینک"
                 variant="outlined"
                 dir="rtl"
                 fullWidth
                 value={link}
-                onChange={(e) => setLink(e.target.value)}
+                onChange={(e) => handleLink(e.target.value)}
               />
+              <Typography
+                fontWeight={400}
+                fontSize={"0.64rem"}
+                lineHeight={1.66}
+                color="rgb(211, 47, 47)"
+                m={"3px 14px -20px"}
+                display={`${inValidLink ? "" : "none"}`}
+              >
+                وارد کردن این فیلد اجباری است
+              </Typography>
             </Grid>
           </Grid>
           <Box
@@ -111,7 +167,11 @@ export default function AddNewConnection({
             }}
           >
             <Button
-              onClick={() => setChecked(false)}
+              onClick={() => {
+                setChecked(false);
+                setConnectionType("undefined");
+                setLink("");
+              }}
               sx={{
                 color: "#ffa82e",
                 py: "3px",
@@ -130,7 +190,6 @@ export default function AddNewConnection({
             >
               انصراف
             </Button>
-
             <Button
               disabled={disabled}
               onClick={() => addNew()}
@@ -146,8 +205,7 @@ export default function AddNewConnection({
                 fontWeight: "500",
                 fontSize: "0.69rem",
                 "&:hover": {
-                  borderColor: "#ffa82e",
-                  backgroundColor: "inherit",
+                  backgroundColor: "#B27520",
                 },
               }}
             >
@@ -161,7 +219,8 @@ export default function AddNewConnection({
         {`.Mui-disabled { 
         background-color: #D6D8DA;
         box-shadow:none;
-        }`}
+        }
+        `}
       </style>
     </>
   );

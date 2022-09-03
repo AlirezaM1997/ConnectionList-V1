@@ -5,12 +5,14 @@ import { IConnection } from "../interfaces/interface";
 import List from "@mui/material/List";
 import ConnectionItem from "./ConnectionItem";
 import AddNewConnection from "./AddNewConnection";
+import { UID } from "../features/functions";
 export default function Dashboard() {
   const [checked, setChecked] = useState<boolean>(false);
   const [connectionList, setConnectionList] = useState<IConnection[]>([
     {
       connectionType: "توییتر",
       link: "https://mui.com/material-ui/react-card/",
+      _id: UID(),
     },
   ]);
   return (
@@ -71,7 +73,8 @@ export default function Dashboard() {
           </Typography>
           <Button
             variant="contained"
-            onClick={()=>setChecked(true)}
+            disabled={checked ? true : false}
+            onClick={() => setChecked(true)}
             sx={{
               color: "#ffa82e",
               mt: 2,
@@ -85,6 +88,9 @@ export default function Dashboard() {
                 boxShadow: "none",
                 backgroundColor: "#FFFCF6",
               },
+              "&:disabled": {
+                backgroundColor: "transparent",
+              },
             }}
           >
             + افزودن مسیر ارتباطی
@@ -97,7 +103,12 @@ export default function Dashboard() {
           />
           <List>
             {connectionList.map((item, index) => (
-              <ConnectionItem key={index} item={item} />
+              <ConnectionItem
+                key={index}
+                item={item}
+                connectionList={connectionList}
+                setConnectionList={setConnectionList}
+              />
             ))}
           </List>
         </Box>
