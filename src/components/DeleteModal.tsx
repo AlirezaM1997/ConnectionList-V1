@@ -117,7 +117,11 @@ export default function DeleteModal({
               </Button>
               <Button
                 disabled={disabled}
-                onClick={() => deleteItem(id)}
+                onClick={() => {
+                  deleteItem(id);
+                  handleClose();
+                  setDisabled(true)
+                }}
                 sx={{
                   color: "#000000de",
                   py: "3px",
